@@ -4,10 +4,45 @@
 
 Smart Trip Expense & Planning Platform - Backend API built with Node.js, TypeScript, and Express. Supports multi-currency expenses, flexible split calculations (equal, unequal, percentage), intelligent settlement recommendations, budget tracking, and loyalty rewards.
 
+**📖 Documentation Philosophy:** This repository is intentionally documentation-heavy and implementation-light, as per the case study instructions, to highlight system design thinking, algorithmic trade-offs, and edge case awareness. The goal is clarity over code volume.
+
 ---
 
 ## 📋 Table of Contents
 
+- [How to Review This Project](#how-to-review-this-project)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
+- [Core Algorithms](#core-algorithms)
+- [What's Mocked](#whats-mocked)
+- [Known Limitations](#known-limitations)
+- [Testing](#testing)
+- [Contributing](#contributing)
+
+---
+
+## 🗺️ How to Review This Project
+
+For busy reviewers, here's the recommended walkthrough order:
+
+1. **Start here (README)** - Get the big picture: features, architecture, limitations
+2. **ER Diagram** (`docs/ER_DIAGRAM.md`) - Understand entities and relationships
+3. **Domain Models** (`src/shared/types/index.ts`) - Review type definitions with extensive inline documentation
+4. **Expense Splitting Engine** (`src/modules/expense/expense.service.ts`) - Core algorithm with step-by-step explanations
+5. **Settlement Optimizer** (`src/modules/settlement/settlement.service.ts`) - Greedy algorithm with complexity analysis
+6. **Edge Cases** (`docs/EDGE_CASES.md`) - 50+ edge cases with handling status and rounding tolerances
+7. **Utility Functions** (`src/shared/utils/`) - Rounding precision and currency conversion
+
+**Quick Start:** If you have 5 minutes, read sections 1, 2, and 6. If you have 30 minutes, follow the full order above.
+
+---
+
+## 📋 Table of Contents (Detailed) (Detailed)
+
+- [How to Review This Project](#how-to-review-this-project)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Project Structure](#project-structure)
