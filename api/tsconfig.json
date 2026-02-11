@@ -6,8 +6,7 @@
       "@/*": ["src/*"]
     },
     "module": "CommonJS",
-    "esModuleInterop": true,
-    "outDir": "../dist/api"
+    "esModuleInterop": true
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

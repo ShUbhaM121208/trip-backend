@@ -3,6 +3,9 @@ node_modules/
 
 # Build output
 dist/
+api/*.js
+api/*.d.ts
+api/*.js.map
 
 # Environment variables
 .env
