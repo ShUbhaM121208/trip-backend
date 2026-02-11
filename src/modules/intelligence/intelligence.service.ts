@@ -487,7 +487,7 @@ export class IntelligenceService {
     // Anomaly detection
     if (patterns.anomalies && patterns.anomalies.length > 0) {
       response += `\n**Unusual Expenses Detected:**\n`;
-      patterns.anomalies.forEach(anomaly => {
+      patterns.anomalies.forEach((anomaly: { amount: number; category: string; date: string }) => {
         response += `• $${anomaly.amount.toFixed(2)} on ${anomaly.category} (${anomaly.date})\n`;
       });
     }
