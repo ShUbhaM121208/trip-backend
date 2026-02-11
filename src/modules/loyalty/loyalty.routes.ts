@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { LoyaltyController } from './loyalty.controller';
-import { validateParams } from '@/shared/middleware/validator';
+import { validateParams, validateBody } from '@/shared/middleware/validator';
 import { z } from 'zod';
 
 const router = Router();
@@ -16,6 +16,11 @@ const controller = new LoyaltyController();
  */
 const userIdParamSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
+});
+
+const applyDiscountSchema = z.object({
+  originalPrice: z.number().positive('Original price must be positive'),
+  discountType: z.enum(['subscription', 'feature', 'export']),
 });
 
 /**
@@ -37,6 +42,21 @@ router.post(
   '/loyalty/:userId/refresh',
   validateParams(userIdParamSchema),
   controller.refreshLoyaltyPoints.bind(controller)
+);
+
+// GET /api/v1/loyalty/:userId/discounts - Get available discounts
+router.get(
+  '/loyalty/:userId/discounts',
+  validateParams(userIdParamSchema),
+  controller.getDiscounts.bind(controller)
+);
+
+// POST /api/v1/loyalty/:userId/apply-discount - Calculate discounted price
+router.post(
+  '/loyalty/:userId/apply-discount',
+  validateParams(userIdParamSchema),
+  validateBody(applyDiscountSchema),
+  controller.applyDiscount.bind(controller)
 );
 
 export default router;

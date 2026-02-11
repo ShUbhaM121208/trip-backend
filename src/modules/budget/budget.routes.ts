@@ -47,4 +47,11 @@ router.put(
   controller.updateBudgetAllocations.bind(controller)
 );
 
+// GET /api/v1/trips/:tripId/budget/duration - Get duration metrics
+router.get(
+  '/trips/:tripId/budget/duration',
+  validateParams(tripIdParamSchema),
+  controller.getDurationMetrics.bind(controller)
+);
+
 export default router;

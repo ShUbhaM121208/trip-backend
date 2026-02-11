@@ -1,0 +1,10 @@
+{
+  "description": "Hotel in Paris - 3 nights",
+  "amount": 300,
+  "currency": "EUR",
+  "date": "2026-06-02",
+  "category": "accommodation",
+  "paidBy": "u1",
+  "splitType": "equal",
+  "splitBetween": ["u1", "u2", "u3"]
+}

@@ -30,6 +30,12 @@ router.post(
   controller.chat.bind(controller)
 );
 
+// GET /api/v1/intelligence/destinations - Get available destinations
+router.get('/intelligence/destinations', controller.getAvailableDestinations.bind(controller));
+
+// GET /api/v1/intelligence/places/:destination - Get place insights
+router.get('/intelligence/places/:destination', controller.getPlaceInsight.bind(controller));
+
 // GET /api/v1/intelligence/history - Get chat history
 router.get('/intelligence/history', controller.getChatHistory.bind(controller));
 

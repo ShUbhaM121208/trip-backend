@@ -164,4 +164,87 @@ export class BudgetService {
     if (percentage > 90) return 'near';
     return 'under';
   }
+
+  /**
+   * Get duration-based budget metrics
+   */
+  getDurationMetrics(tripId: string): {
+    totalDays: number;
+    elapsedDays: number | null;
+    remainingDays: number | null;
+    budgetPerDay: number;
+    avgDailySpend: number | null;
+    recommendedDailySpend: number | null;
+    projectedTotal: number | null;
+    projectedOverage: number | null;
+  } {
+    const trip = findTripById(tripId);
+    if (!trip) {
+      throw createNotFoundError('Trip', tripId);
+    }
+
+    // Calculate total trip duration
+    const startTime = new Date(trip.startDate).getTime();
+    const endTime = new Date(trip.endDate).getTime();
+    const totalDays = Math.ceil((endTime - startTime) / (1000 * 60 * 60 * 24));
+    
+    // Budget per day (simple division)
+    const budgetPerDay = trip.budget / totalDays;
+    
+    // If trip is active, calculate more metrics
+    const now = new Date().getTime();
+    const isActive = now >= startTime && now <= endTime;
+    const hasStarted = now >= startTime;
+    
+    let elapsedDays = null;
+    let remainingDays = null;
+    let avgDailySpend = null;
+    let recommendedDailySpend = null;
+    let projectedTotal = null;
+    let projectedOverage = null;
+    
+    if (hasStarted) {
+      elapsedDays = Math.max(1, Math.ceil((now - startTime) / (1000 * 60 * 60 * 24)));
+      remainingDays = Math.max(0, Math.ceil((endTime - now) / (1000 * 60 * 60 * 24)));
+      
+      // Calculate average daily spend so far
+      if (elapsedDays > 0) {
+        avgDailySpend = trip.totalSpent / elapsedDays;
+        
+        // Project total spending based on current rate
+        projectedTotal = avgDailySpend * totalDays;
+        projectedOverage = projectedTotal - trip.budget;
+      }
+      
+      // Calculate recommended daily spend for remaining days
+      if (remainingDays > 0) {
+        const remainingBudget = trip.budget - trip.totalSpent;
+        recommendedDailySpend = remainingBudget / remainingDays;
+      }
+    }
+    
+    return {
+      totalDays,
+      elapsedDays,
+      remainingDays,
+      budgetPerDay: round(budgetPerDay),
+      avgDailySpend: avgDailySpend !== null ? round(avgDailySpend) : null,
+      recommendedDailySpend: recommendedDailySpend !== null ? round(recommendedDailySpend) : null,
+      projectedTotal: projectedTotal !== null ? round(projectedTotal) : null,
+      projectedOverage: projectedOverage !== null ? round(projectedOverage) : null,
+    };
+  }
+
+  /**
+   * Get enhanced budget breakdown with duration metrics
+   */
+  getBudgetBreakdownWithDuration(tripId: string) {
+    const breakdown = this.getBudgetBreakdown(tripId);
+    const duration = this.getDurationMetrics(tripId);
+    
+    return {
+      ...breakdown,
+      duration,
+    };
+  }
 }

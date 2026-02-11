@@ -43,10 +43,12 @@
  */
 
 import type { Balance, Settlement, User } from '@/shared/types';
-import { expenses, findTripById } from '@/shared/data/mockDataStore';
+import { expenses, findTripById, settlements } from '@/shared/data/mockDataStore';
 import { round } from '@/shared/utils/rounding.util';
 import { convertCurrency } from '@/shared/utils/currency.util';
 import { createNotFoundError } from '@/shared/middleware/errorHandler';
+import { generateId } from '@/shared/utils/id.util';
+import { getCurrentTimestamp } from '@/shared/utils/date.util';
 
 /**
  * Service class handling settlement and balance calculations
@@ -536,6 +538,166 @@ export class SettlementService {
       totalTransactions: settlements.length,
       totalAmountToSettle: round(totalAmountToSettle),
       currency: trip.baseCurrency,
+    };
+  }
+
+  /**
+   * Generate and save settlements for a trip with tracking IDs
+   * 
+   * Creates settlements with unique IDs and pending status for tracking payments.
+   * 
+   * @param tripId - Trip identifier
+   * @returns Array of settlements with IDs and status
+   * 
+   * WORKFLOW:
+   * 1. Calculate optimal settlements
+   * 2. Assign unique IDs to each settlement
+   * 3. Set initial status as 'pending'
+   * 4. Store in settlements Map
+   * 5. Return tracked settlements
+   * 
+   * PURPOSE:
+   * - Enable payment tracking
+   * - Allow marking settlements as paid
+   * - Track settlement history
+   * - Support partial settlement scenarios
+   */
+  generateSettlements(tripId: string): Settlement[] {
+    const trip = findTripById(tripId);
+    if (!trip) {
+      throw createNotFoundError('Trip', tripId);
+    }
+
+    const suggested = this.calculateSettlements(tripId);
+    
+    // Add IDs and tracking fields
+    const trackedSettlements: Settlement[] = suggested.map(s => ({
+      ...s,
+      id: `settlement-${generateId()}`,
+      status: 'pending' as const,
+      tripId,
+    }));
+
+    settlements.set(tripId, trackedSettlements);
+    return trackedSettlements;
+  }
+
+  /**
+   * Get tracked settlements for a trip
+   * 
+   * Returns settlements with their current status (pending/completed).
+   * If no settlements exist, generates them automatically.
+   * 
+   * @param tripId - Trip identifier
+   * @returns Array of tracked settlements
+   */
+  getTrackedSettlements(tripId: string): Settlement[] {
+    const trip = findTripById(tripId);
+    if (!trip) {
+      throw createNotFoundError('Trip', tripId);
+    }
+
+    let tripSettlements = settlements.get(tripId);
+    
+    // Auto-generate if not exists
+    if (!tripSettlements || tripSettlements.length === 0) {
+      tripSettlements = this.generateSettlements(tripId);
+    }
+
+    return tripSettlements;
+  }
+
+  /**
+   * Mark settlement as paid
+   * 
+   * Updates settlement status to 'completed' and records payment timestamp.
+   * 
+   * @param tripId - Trip identifier
+   * @param settlementId - Settlement identifier
+   * @returns Updated settlement
+   * @throws NotFoundError if trip or settlement not found
+   * 
+   * VALIDATION:
+   * - Trip must exist
+   * - Settlement must exist
+   * - Settlement must be pending (cannot re-mark completed ones)
+   * 
+   * SIDE EFFECTS:
+   * - Updates settlement status
+   * - Records payment timestamp
+   * - Updates settlements Map
+   */
+  markSettlementAsPaid(tripId: string, settlementId: string): Settlement {
+    const trip = findTripById(tripId);
+    if (!trip) {
+      throw createNotFoundError('Trip', tripId);
+    }
+
+    const tripSettlements = settlements.get(tripId) || [];
+    const settlement = tripSettlements.find(s => s.id === settlementId);
+    
+    if (!settlement) {
+      throw createNotFoundError('Settlement', settlementId);
+    }
+
+    // Update settlement
+    settlement.status = 'completed';
+    settlement.paidAt = getCurrentTimestamp();
+    
+    // Save back to Map
+    settlements.set(tripId, tripSettlements);
+    
+    return settlement;
+  }
+
+  /**
+   * Get settlement summary with status tracking
+   * 
+   * Provides comprehensive settlement statistics including payment status.
+   * 
+   * @param tripId - Trip identifier
+   * @returns Settlement summary with counts and amounts
+   * 
+   * RETURNED DATA:
+   * - totalSettlements: Total number of settlements
+   * - completedSettlements: Number marked as paid
+   * - pendingSettlements: Number still pending payment
+   * - totalAmountToSettle: Sum of pending payment amounts
+   * - totalAmountSettled: Sum of completed payment amounts
+   * - allSettled: Boolean indicating if all payments complete
+   * 
+   * USE CASES:
+   * - Display settlement progress UI
+   * - Validate trip completion eligibility
+   * - Show payment summary statistics
+   */
+  getSettlementSummaryWithStatus(tripId: string): {
+    totalSettlements: number;
+    completedSettlements: number;
+    pendingSettlements: number;
+    totalAmountToSettle: number;
+    totalAmountSettled: number;
+    currency: string;
+    allSettled: boolean;
+  } {
+    const trip = findTripById(tripId);
+    if (!trip) {
+      throw createNotFoundError('Trip', tripId);
+    }
+
+    const tripSettlements = this.getTrackedSettlements(tripId);
+    
+    const completed = tripSettlements.filter(s => s.status === 'completed');
+    const pending = tripSettlements.filter(s => s.status === 'pending' || !s.status);
+
+    return {
+      totalSettlements: tripSettlements.length,
+      completedSettlements: completed.length,
+      pendingSettlements: pending.length,
+      totalAmountToSettle: round(pending.reduce((sum, s) => sum + s.amount, 0)),
+      totalAmountSettled: round(completed.reduce((sum, s) => sum + s.amount, 0)),
+      currency: trip.baseCurrency,
+      allSettled: tripSettlements.length > 0 && pending.length === 0,
     };
   }
 }

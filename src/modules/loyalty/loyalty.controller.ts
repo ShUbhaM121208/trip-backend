@@ -61,4 +61,41 @@ export class LoyaltyController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/v1/loyalty/:userId/discounts
+   * Get available discounts for a user
+   */
+  async getDiscounts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const discounts = loyaltyService.getDiscounts(getParam(req, 'userId'));
+      res.json({
+        success: true,
+        data: discounts,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/loyalty/:userId/apply-discount
+   * Calculate discounted price
+   */
+  async applyDiscount(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { originalPrice, discountType } = req.body;
+      const result = loyaltyService.applyDiscount(
+        getParam(req, 'userId'),
+        originalPrice,
+        discountType
+      );
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

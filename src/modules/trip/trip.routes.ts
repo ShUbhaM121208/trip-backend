@@ -68,4 +68,18 @@ router.get(
   controller.getTripParticipants.bind(controller)
 );
 
+// POST /api/v1/trips/:id/complete - Complete trip with validation
+router.post(
+  '/:id/complete',
+  validateParams(idParamSchema),
+  controller.completeTrip.bind(controller)
+);
+
+// POST /api/v1/trips/:id/force-complete - Force complete trip without validation
+router.post(
+  '/:id/force-complete',
+  validateParams(idParamSchema),
+  controller.forceCompleteTrip.bind(controller)
+);
+
 export default router;

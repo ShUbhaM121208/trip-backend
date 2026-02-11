@@ -81,31 +81,59 @@ For busy reviewers, here's the recommended walkthrough order:
 
 - **🏆 Loyalty Program**
   - Point-based gamification system
-  - Three tiers: Bronze, Silver, Gold
+  - Three tiers: Bronze, Silver, Gold (with subscription integration)
   - Points for trip participation and expense creation
   - Tier progression tracking
+  - Subscription tiers: Free, Basic, Premium
 
-- **💬 AI Assistant (Mock)**
-  - Chat-based interface
+- **💬 AI Assistant (Enhanced)**
+  - Chat-based interface with keyword matching
   - Expense analysis and insights
   - Budget recommendations
+  - Top spender analysis
   - Settlement advice
+  - Contextual responses based on trip data
 
-- **🎫 Support System**
+- **🎫 Support System (Enhanced with Plan Eligibility)**
   - Ticket creation and management
   - Status tracking (open, in-progress, resolved)
-  - Simple escalation flow
+  - **Plan-based human escalation** (Basic/Premium only)
+  - Subscription tier validation
+  - SLA differentiation: 4-hour (Premium) vs 24-hour (Basic)
+  - Free tier: AI support only
+
+- **🌍 Vendor Directory (NEW)**
+  - 30 curated vendors across 6 destinations
+  - Categories: Hotel, Restaurant, Tour, Transport, Emergency
+  - Location-based filtering
+  - Verified vendor badges
+  - Rating system (1-5 stars)
+  - Price range indicators ($, $$, $$$)
+  - Service search functionality
+
+- **🗺️ Place Insights (NEW with Comprehensive Data)**
+  - 6 destinations: Paris, Tokyo, Bali, New York, London, Dubai
+  - Best time to visit recommendations
+  - Average daily cost estimates
+  - Top attractions list
+  - Safety warnings and advisories
+  - Visa requirements
+  - Seasonal notes and weather guidance
+  - Language and currency information
+  - Practical travel tips
+  - **See [PLACE_INSIGHTS.md](docs/PLACE_INSIGHTS.md) for data sourcing strategy**
 
 ### ⚠️ Not Implemented
 
 - ❌ Database persistence (in-memory only)
-- ❌ Authentication/Authorization
-- ❌ Real AI integration
-- ❌ Real-time currency rates
+- ❌ Authentication/Authorization (subscription tiers in place, no auth layer)
+- ❌ Real AI integration (keyword-based mock responses)
+- ❌ Real-time currency rates (static exchange rates)
 - ❌ File uploads (receipts)
 - ❌ Email notifications
 - ❌ Partial settlement tracking
 - ❌ Payment integration
+- ❌ Real-time place insights API (seeded data)
 
 ---
 
