@@ -1,13 +1,9 @@
 /**
  * Vercel Serverless Function Entry Point
- * Exports the Express app for Vercel deployment
+ * Exports Express app for Vercel serverless deployment
  */
 
-// Use relative path instead of alias for Vercel compatibility
-import { createApp } from '../dist/app';
+import { createApp } from '../src/app';
 
-// Create the Express app
-const app = createApp();
-
-// Export handler for Vercel
-export default app;
+// Create and export the Express app for Vercel
+export default createApp();
