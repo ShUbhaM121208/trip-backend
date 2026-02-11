@@ -45,4 +45,20 @@ export class BudgetController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/v1/trips/:tripId/budget/duration
+   * Get duration-based budget metrics
+   */
+  async getDurationMetrics(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const metrics = budgetService.getDurationMetrics(getParam(req, 'tripId'));
+      res.json({
+        success: true,
+        data: metrics,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

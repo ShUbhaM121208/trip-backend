@@ -4,7 +4,7 @@
  */
 
 import type { Trip, CreateTripDto, UpdateTripDto, User } from '@/shared/types';
-import { trips, users, expenses, findUserById } from '@/shared/data/mockDataStore';
+import { trips, users, expenses, findUserById, settlements } from '@/shared/data/mockDataStore';
 import { generateTripId } from '@/shared/utils/id.util';
 import { isValidDate, isValidDateRange } from '@/shared/utils/date.util';
 import { round } from '@/shared/utils/rounding.util';
@@ -178,5 +178,90 @@ export class TripService {
 
     trip.totalSpent = round(totalSpent);
     return trip;
+  }
+
+  /**
+   * Complete trip with validation
+   * 
+   * Validates all settlements are marked as paid before completing the trip.
+   * 
+   * @param id - Trip identifier
+   * @returns Updated trip with status 'completed'
+   * @throws NotFoundError if trip not found
+   * @throws BadRequestError if settlements are not fully paid
+   * 
+   * WORKFLOW:
+   * 1. Validate trip exists
+   * 2. Check if trip already completed
+   * 3. Verify all settlements marked as paid
+   * 4. Update status to 'completed'
+   * 5. Return updated trip
+   * 
+   * USE CASES:
+   * - Normal trip completion workflow
+   * - Ensures clean financial closure
+   * - Prevents completion with pending settlements
+   */
+  completeTrip(id: string): Trip {
+    const trip = trips.find((t) => t.id === id);
+    if (!trip) {
+      throw createNotFoundError('Trip', id);
+    }
+
+    if (trip.status === 'completed') {
+      throw createBadRequestError('Trip is already completed');
+    }
+
+    // Check settlements status
+    const tripSettlements = settlements.get(id) || [];
+    
+    if (tripSettlements.length > 0) {
+      const pendingSettlements = tripSettlements.filter(
+        s => s.status === 'pending' || !s.status
+      );
+      
+      if (pendingSettlements.length > 0) {
+        throw createBadRequestError(
+          `Cannot complete trip. ${pendingSettlements.length} settlement(s) are still pending payment. ` +
+          `Please mark all settlements as paid or use force complete.`
+        );
+      }
+    }
+
+    trip.status = 'completed';
+    return this.calculateTotalSpent(trip);
+  }
+
+  /**
+   * Force complete trip without validation
+   * 
+   * Completes trip regardless of settlement status. Use for edge cases only.
+   * 
+   * @param id - Trip identifier
+   * @returns Updated trip with status 'completed'
+   * @throws NotFoundError if trip not found
+   * 
+   * WARNING:
+   * - Bypasses settlement validation
+   * - Should be used sparingly
+   * - May leave financial inconsistencies
+   * 
+   * USE CASES:
+   * - Trip cancelled with partial settlements
+   * - Settlements handled outside system
+   * - Administrative override needed
+   */
+  forceCompleteTrip(id: string): Trip {
+    const trip = trips.find((t) => t.id === id);
+    if (!trip) {
+      throw createNotFoundError('Trip', id);
+    }
+
+    if (trip.status === 'completed') {
+      throw createBadRequestError('Trip is already completed');
+    }
+
+    trip.status = 'completed';
+    return this.calculateTotalSpent(trip);
   }
 }

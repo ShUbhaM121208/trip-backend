@@ -1,0 +1,10 @@
+{
+  "name": "Europe Adventure",
+  "description": "Summer trip to Europe",
+  "startDate": "2026-06-01",
+  "endDate": "2026-06-15",
+  "destination": "Paris, France",
+  "baseCurrency": "EUR",
+  "budget": 5000,
+  "participantIds": ["u1", "u2", "u3"]
+}

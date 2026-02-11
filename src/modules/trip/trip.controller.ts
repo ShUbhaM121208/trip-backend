@@ -110,4 +110,38 @@ export class TripController {
       next(error);
     }
   }
+
+  /**
+   * POST /api/v1/trips/:id/complete
+   * Complete trip with validation
+   */
+  async completeTrip(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const trip = tripService.completeTrip(getParam(req, 'id'));
+      res.json({
+        success: true,
+        data: { trip },
+        message: 'Trip completed successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/trips/:id/force-complete
+   * Force complete trip without validation
+   */
+  async forceCompleteTrip(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const trip = tripService.forceCompleteTrip(getParam(req, 'id'));
+      res.json({
+        success: true,
+        data: { trip },
+        message: 'Trip force completed successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
