@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "outDir": "../dist/api"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
